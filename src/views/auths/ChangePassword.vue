@@ -1,5 +1,5 @@
 <template>
-  <a-row type="flex" justify="center" align="middle" style="height: 100vh">
+  <a-row type="flex" justify="center" style="height: 100vh">
     <a-col :span="14">
       <a-card hoverable style="margin-top: 50px; margin-bottom: 50px">
         <a-row
@@ -8,40 +8,37 @@
           align="middle"
           style="padding-top: 30px; padding-bottom: 50px"
         >
-          <a-col :span="16">
-            <a-page-header
-              title="Sign up"
-              @back="() => $router.push({ name: 'login' })"
-            />
+          <a-col :span="22">
+            <a-page-header title="Change Password" />
             <a-form
               :model="formState"
               v-bind="layout"
               name="nest-messages"
               @finish="register"
             >
-              <a-divider orientation="left">Login</a-divider>
               <a-form-item
-                name="username"
-                label="Username"
+                label="Current Password"
+                name="current_password"
                 :rules="[
                   {
                     required: true,
-                    max: 12,
-                    pattern: '^[A-Za-z0-9_]+$',
+                    min: 6,
                   },
                 ]"
               >
-                <a-input
-                  v-model:value="formState.username"
-                  placeholder="Username"
+                <a-input-password
+                  v-model:value="formState.current_password"
+                  placeholder="Current Password"
                 />
               </a-form-item>
+              <a-divider orientation="left">New Password</a-divider>
               <a-form-item
                 label="Password"
                 name="password"
                 :rules="[{ required: true, min: 6 }]"
               >
                 <a-input-password
+                  :disabled="formState.current_password.length < 6"
                   v-model:value="formState.password"
                   @input="checkPassword"
                   placeholder="Password"
@@ -104,49 +101,8 @@
                   placeholder="Re - Password"
                 />
               </a-form-item>
-              <a-divider orientation="left">Profile</a-divider>
-              <a-form-item
-                name="first_name"
-                :rules="[{ required: true, min: 5, max: 50 }]"
-                label="First Name"
-              >
-                <a-input
-                  v-model:value="formState.first_name"
-                  placeholder="First Name"
-                />
-              </a-form-item>
-              <a-form-item
-                name="last_name"
-                :rules="[{ required: true, min: 5, max: 50 }]"
-                label="Last Name"
-              >
-                <a-input
-                  v-model:value="formState.last_name"
-                  placeholder="Last Name"
-                />
-              </a-form-item>
-              <!-- <a-form-item label="Image">
-                <a-form-item name="dragger" no-style>
-                  <a-upload-dragger
-                    v-model:fileList="formState.user.image"
-                    name="logo"
-                    action="/upload.do"
-                    list-type="picture"
-                  >
-                    <p class="ant-upload-drag-icon">
-                      <FileImageOutlined />
-                    </p>
-                    <p class="ant-upload-text">
-                      Click or drag file to this area to upload
-                    </p>
-                    <p class="ant-upload-hint">
-                      Support for a single or bulk upload.
-                    </p>
-                  </a-upload-dragger>
-                </a-form-item>
-              </a-form-item> -->
               <a-button type="primary" html-type="submit" block
-                >Sign up</a-button
+                >Update Password</a-button
               >
             </a-form>
           </a-col>
@@ -157,34 +113,24 @@
 </template>
 <script lang="ts">
 import { defineComponent, reactive, inject, h } from "vue";
-import {
-  FileImageOutlined,
-  SmileOutlined,
-  FrownOutlined,
-} from "@ant-design/icons-vue";
+import { SmileOutlined, FrownOutlined } from "@ant-design/icons-vue";
 import type { RuleObject } from "ant-design-vue/es/form";
 import { notification } from "ant-design-vue";
 import { useStore } from "vuex";
 
 interface FormState {
-  username: string;
+  current_password: string;
   password: string;
   password_confirmation: string;
-  first_name: string;
-  last_name: string;
-  image: any;
   valid_password: boolean;
 }
 
 export default defineComponent({
-  components: {
-    //FileImageOutlined,
-  },
   setup() {
     const axios: any = inject("axios"); // inject axios
     const router: any = inject("router"); // inject router
 
-    const store = useStore()
+    const store = useStore();
 
     const register = (data: any): void => {
       store.dispatch("isLoading", true);
@@ -194,21 +140,20 @@ export default defineComponent({
       }
 
       axios
-        .post(process.env.VUE_APP_SERVER_URL + "register", formData)
+        .post(process.env.VUE_APP_SERVER_URL + "updatePassword", formData)
         .then((response: { data: any }) => {
           store.dispatch("isLoading", false);
           const res = response.data;
           if (res.status) {
-            const result = res.result;
-            localStorage.setItem("token_access", result.token_access);
-            localStorage.setItem("full_name", result.full_name);
-            localStorage.setItem("thumbnail", result.thumbnail);
+            localStorage.removeItem("token_access");
+            localStorage.removeItem("full_name");
+            localStorage.removeItem("thumbnail");
             notification.open({
               message: res.message,
               icon: () => h(SmileOutlined, { style: "color: #42ba96" }),
             });
             setTimeout(() => {
-              router.go({ name: "dashboard" });
+              router.go({ name: "login" });
             }, 500);
           } else {
             let description = "";
@@ -237,12 +182,9 @@ export default defineComponent({
     };
 
     const formState = reactive<FormState>({
-      username: "",
+      current_password: "",
       password: "",
       password_confirmation: "",
-      first_name: "",
-      last_name: "",
-      image: null,
       valid_password: false,
     });
 

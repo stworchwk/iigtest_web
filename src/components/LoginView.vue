@@ -57,7 +57,7 @@
           <a-col :span="12">
             <img
               src="https://mixkit.imgix.net/art/preview/mixkit-left-handed-man-sitting-at-a-table-writing-in-a-notebook-27-original-large.png?q=80&auto=format%2Ccompress&h=700"
-              style="width: 100%;"
+              style="width: 100%"
             />
           </a-col>
         </a-row>
@@ -69,6 +69,7 @@
 import { defineComponent, reactive, inject, h } from "vue";
 import { notification } from "ant-design-vue";
 import { SmileOutlined, FrownOutlined } from "@ant-design/icons-vue";
+import { useStore } from "vuex";
 
 interface FormState {
   username: string;
@@ -80,6 +81,7 @@ export default defineComponent({
   setup() {
     const axios: any = inject("axios"); // inject axios
     const router: any = inject("router"); // inject router
+    const store = useStore();
 
     const formState = reactive<FormState>({
       username: "",
@@ -87,6 +89,8 @@ export default defineComponent({
       remember: true,
     });
     const onFinish = (values: any) => {
+      store.dispatch("isLoading", true);
+
       let formData = new FormData();
       for (var key in values) {
         formData.append(key, values[key]);
@@ -97,16 +101,20 @@ export default defineComponent({
         .then((response: { data: any }) => {
           const res = response.data;
           if (res.status) {
-            const token_access = res.result.token_access;
-            localStorage.setItem("token_access", token_access);
+            const result = res.result;
+            localStorage.setItem("token_access", result.token_access);
+            localStorage.setItem("full_name", result.full_name);
+            localStorage.setItem("thumbnail", result.thumbnail);
             notification.open({
               message: res.message,
               icon: () => h(SmileOutlined, { style: "color: #42ba96" }),
             });
             setTimeout(() => {
+              store.dispatch("isLoading", false);
               router.go({ name: "dashboard" });
             }, 500);
           } else {
+            store.dispatch("isLoading", false);
             let description = "";
             const errors = res.result?.errors;
             for (var key in errors) {
