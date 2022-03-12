@@ -127,7 +127,7 @@ export default defineComponent({
           const res = response.data;
           if (res.status) {
             localStorage.setItem("full_name", res.result?.profile?.full_name);
-            localStorage.setItem("thumbnail", res.result?.profile?.thumbnail);
+            localStorage.setItem("thumbnail", res.result?.profile?.image_path);
             notification.open({
               message: res.message,
               icon: () => h(SmileOutlined, { style: "color: #42ba96" }),

@@ -1,7 +1,7 @@
 <template>
   <a-layout-header style="background: #fff; padding: 0">
     <strong style="margin-left: 20px">IIG Test</strong>
-    <a-menu mode="horizontal" style="float: right">
+    <a-menu mode="horizontal" style="float: right;">
       <a-sub-menu key="sub1">
         <template #icon>
           <a-avatar :src="profile.thumbnail" />
@@ -58,7 +58,6 @@ export default defineComponent({
           ? "https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
           : localStorage.thumbnail,
     };
-
     const logout = () => {
       Modal.confirm({
         title: "Are you sure you want to log out?",
@@ -108,8 +107,8 @@ export default defineComponent({
 
     return {
       logout,
-      profile,
+      profile
     };
-  },
+  }
 });
 </script>

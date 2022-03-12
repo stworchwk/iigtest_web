@@ -22,7 +22,7 @@ import LeftSideBar from "@/components/layouts/LeftSideBar.vue";
 import ContentSection from "@/components/layouts/ContentSection.vue";
 import FooterSection from "@/components/layouts/FooterSection.vue";
 import axios from "axios";
-import { mapState } from 'vuex';
+import { mapState } from "vuex";
 
 export default defineComponent({
   components: {
@@ -34,12 +34,13 @@ export default defineComponent({
   setup() {
     const token_access = localStorage.token_access;
     axios.defaults.headers.common["Authorization"] = "Bearer " + token_access;
+
     return {
       token_access,
     };
   },
   computed: {
-    ...mapState(['isLoading'])
+    ...mapState(["isLoading"]),
   },
 });
 </script>
