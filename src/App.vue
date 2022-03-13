@@ -1,30 +1,46 @@
 <template>
-  <nav>
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
-  </nav>
-  <router-view/>
+  <a-spin :spinning="isLoading" size="large" tip="Loading...">
+    <a-layout
+      style="min-height: 100vh"
+      v-if="token_access && token_access !== ''"
+    >
+      <LeftSideBar />
+      <a-layout>
+        <HeaderBar />
+        <ContentSection />
+        <FooterSection />
+      </a-layout>
+    </a-layout>
+    <router-view v-else />
+  </a-spin>
 </template>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
+<script lang="ts">
+import { defineComponent } from "vue";
+import HeaderBar from "@/components/layouts/HeaderBar.vue";
+import LeftSideBar from "@/components/layouts/LeftSideBar.vue";
+import ContentSection from "@/components/layouts/ContentSection.vue";
+import FooterSection from "@/components/layouts/FooterSection.vue";
+import axios from "axios";
+import { mapState } from "vuex";
 
-nav {
-  padding: 30px;
-}
+export default defineComponent({
+  components: {
+    HeaderBar,
+    LeftSideBar,
+    ContentSection,
+    FooterSection,
+  },
+  setup() {
+    const token_access = localStorage.token_access;
+    axios.defaults.headers.common["Authorization"] = "Bearer " + token_access;
 
-nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-nav a.router-link-exact-active {
-  color: #42b983;
-}
-</style>
+    return {
+      token_access,
+    };
+  },
+  computed: {
+    ...mapState(["isLoading"]),
+  },
+});
+</script>
