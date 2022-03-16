@@ -12,6 +12,7 @@
       </a-layout>
     </a-layout>
     <router-view v-else />
+    <ModalView />
   </a-spin>
 </template>
 
@@ -21,6 +22,7 @@ import HeaderBar from "@/components/layouts/HeaderBar.vue";
 import LeftSideBar from "@/components/layouts/LeftSideBar.vue";
 import ContentSection from "@/components/layouts/ContentSection.vue";
 import FooterSection from "@/components/layouts/FooterSection.vue";
+import ModalView from "@/components/layouts/ModalView.vue";
 import axios from "axios";
 import { mapState } from "vuex";
 
@@ -30,6 +32,7 @@ export default defineComponent({
     LeftSideBar,
     ContentSection,
     FooterSection,
+    ModalView,
   },
   setup() {
     const token_access = localStorage.token_access;

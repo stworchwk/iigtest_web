@@ -1,74 +1,65 @@
 <template>
-  <a-row type="flex" justify="center">
-    <a-col :span="14">
-      <a-row
-        type="flex"
-        justify="center"
-        align="middle"
-        style="padding-top: 30px; padding-bottom: 50px"
+  <a-row type="flex" justify="center" align="middle">
+    <a-col :span="20">
+      <a-page-header title="Edit Profile" style="padding-top: 0" />
+      <a-form
+        :model="formState"
+        v-bind="layout"
+        name="nest-messages"
+        @finish="updateProfile"
       >
-        <a-col :span="16">
-          <a-page-header title="Edit Profile" />
-          <a-form
-            :model="formState"
-            v-bind="layout"
-            name="nest-messages"
-            @finish="updateProfile"
-          >
-            <a-upload
-              v-model:file-list="fileList"
-              name="image"
-              list-type="picture-card"
-              class="avatar-uploader"
-              action="/"
-              :before-upload="beforeUpload"
-              :show-upload-list="false"
-              @change="handleChange"
-            >
-              <img
-                v-if="imageUrl"
-                :src="imageUrl"
-                alt="avatar"
-                style="width: 100%"
-              />
-              <div v-else>
-                <loading-outlined v-if="loading"></loading-outlined>
-                <plus-outlined v-else></plus-outlined>
-                <div class="ant-upload-text">Upload</div>
-              </div>
-            </a-upload>
-            <a-divider orientation="left">Profile</a-divider>
-            <a-form-item
-              name="first_name"
-              :rules="[{ required: true, min: 5, max: 50 }]"
-              label="First Name"
-            >
-              <a-input
-                v-model:value="formState.first_name"
-                placeholder="First Name"
-              />
-            </a-form-item>
-            <a-form-item
-              name="last_name"
-              :rules="[{ required: true, min: 5, max: 50 }]"
-              label="Last Name"
-            >
-              <a-input
-                v-model:value="formState.last_name"
-                placeholder="Last Name"
-              />
-            </a-form-item>
-            <a-button type="primary" html-type="submit" block
-              >Update Profile</a-button
-            >
-          </a-form>
-        </a-col>
-      </a-row>
+        <a-upload
+          v-model:file-list="fileList"
+          name="image"
+          list-type="picture-card"
+          class="avatar-uploader"
+          action="/"
+          :before-upload="beforeUpload"
+          :show-upload-list="false"
+          @change="handleChange"
+        >
+          <img
+            v-if="imageUrl"
+            :src="imageUrl"
+            alt="avatar"
+            style="width: 60%"
+          />
+          <div v-else>
+            <loading-outlined v-if="loading"></loading-outlined>
+            <plus-outlined v-else></plus-outlined>
+            <div class="ant-upload-text">Upload</div>
+          </div>
+        </a-upload>
+        <a-divider orientation="left">Profile</a-divider>
+        <a-form-item
+          name="first_name"
+          :rules="[{ required: true, min: 5, max: 50 }]"
+          label="First Name"
+        >
+          <a-input
+            v-model:value="formState.first_name"
+            placeholder="First Name"
+          />
+        </a-form-item>
+        <a-form-item
+          name="last_name"
+          :rules="[{ required: true, min: 5, max: 50 }]"
+          label="Last Name"
+        >
+          <a-input
+            v-model:value="formState.last_name"
+            placeholder="Last Name"
+          />
+        </a-form-item>
+        <a-button type="primary" html-type="submit" block
+          >Update Profile</a-button
+        >
+      </a-form>
     </a-col>
   </a-row>
 </template>
 <script lang="ts">
-import { defineComponent, reactive, inject, h, ref } from "vue";
+import { defineComponent, reactive, inject, h, ref, onMounted } from "vue";
 import {
   SmileOutlined,
   FrownOutlined,
@@ -82,12 +73,6 @@ interface FormState {
   first_name: string;
   last_name: string;
   image: any;
-}
-
-function getBase64(img: Blob, callback: (base64Url: string) => void) {
-  const reader = new FileReader();
-  reader.addEventListener("load", () => callback(reader.result as string));
-  reader.readAsDataURL(img);
 }
 
 export default defineComponent({
@@ -111,6 +96,24 @@ export default defineComponent({
       image: null,
     });
 
+    const getProfile = async () => {
+      await store.dispatch("isLoading", true);
+      try {
+        const res = await axios.get(
+          process.env.VUE_APP_SERVER_URL + "myProfile"
+        );
+        await store.dispatch("isLoading", false);
+        if (res.data.status) {
+          const profile = res.data?.result?.profile;
+          formState.first_name = profile.first_name;
+          formState.last_name = profile.last_name;
+          imageUrl.value = profile.image_path;
+        }
+      } catch (err) {
+        console.log("err");
+      }
+    };
+
     const updateProfile = (data: any): void => {
       store.dispatch("isLoading", true);
       let formData = new FormData();
@@ -118,7 +121,7 @@ export default defineComponent({
         formData.append(key, data[key]);
       }
 
-      formData.append('image', formState.image);
+      formData.append("image", formState.image);
 
       axios
         .post(process.env.VUE_APP_SERVER_URL + "updateProfile", formData)
@@ -132,6 +135,11 @@ export default defineComponent({
               message: res.message,
               icon: () => h(SmileOutlined, { style: "color: #42ba96" }),
             });
+
+            //close modal
+            store.dispatch("modalContentTag", null);
+            store.dispatch("modalClose");
+
             setTimeout(() => {
               router.push({ name: "dashboard" });
             }, 500);
@@ -150,32 +158,18 @@ export default defineComponent({
         });
     };
 
-    const getProfile = async () => {
-      store.dispatch("isLoading", true);
-      try {
-        const res = await axios.get(
-          process.env.VUE_APP_SERVER_URL + "myProfile"
-        );
-        await store.dispatch("isLoading", false);
-        if (res.data.status) {
-          const profile = res.data?.result?.profile;
-          formState.first_name = profile.first_name;
-          formState.last_name = profile.last_name;
-          imageUrl.value = profile.image_path
-        }
-      } catch (err) {
-        console.log("err");
-      }
-    };
-
-    getProfile();
-
     const handleChange = (info: any) => {
-      formState.image = info.file.originFileObj
+      formState.image = info.file.originFileObj;
       getBase64(info.file.originFileObj, (base64Url: string) => {
         imageUrl.value = base64Url;
         loading.value = false;
       });
+    };
+
+    const getBase64 = (img: Blob, callback: (base64Url: string) => void) => {
+      const reader = new FileReader();
+      reader.addEventListener("load", () => callback(reader.result as string));
+      reader.readAsDataURL(img);
     };
 
     const beforeUpload = (file: any["fileList"][number]) => {
@@ -202,6 +196,10 @@ export default defineComponent({
       wrapperCol: { span: 18 },
     };
 
+    onMounted(() => {
+      getProfile();
+    });
+
     return {
       fileList,
       formState,
@@ -210,11 +208,8 @@ export default defineComponent({
       loading,
       imageUrl,
       handleChange,
-      beforeUpload
+      beforeUpload,
     };
-  },
-  created() {
-    // this.getProfile;
   },
 });
 </script>
