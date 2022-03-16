@@ -7,11 +7,8 @@ import ManageUserView from "../views/managements/users/Index.vue";
 import ManageCategoryView from "../views/managements/categories/Index.vue";
 import ManageUnitView from "../views/managements/units/Index.vue";
 
-import LoginView from "@/components/LoginView.vue";
-import RegisterView from "@/components/RegisterView.vue";
-
-import EditProfile from "../views/auths/EditProfile.vue";
-import ChangePassword from "../views/auths/ChangePassword.vue";
+import LoginView from "../views/LoginView.vue";
+import RegisterView from "../views/RegisterView.vue";
 
 const web = (to: any, from: object, next: () => void) => {
   if (typeof localStorage.token_access !== "undefined") {
@@ -48,18 +45,6 @@ const routes = [
     name: "register",
     component: RegisterView,
     beforeEnter: multiguard([web]),
-  },
-  {
-    path: "/editProfile",
-    name: "editProfile",
-    component: EditProfile,
-    beforeEnter: multiguard([auth]),
-  },
-  {
-    path: "/changePassword",
-    name: "changePassword",
-    component: ChangePassword,
-    beforeEnter: multiguard([auth]),
   },
   {
     path: "/dashboard",

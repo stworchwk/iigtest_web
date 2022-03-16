@@ -1,113 +1,93 @@
 <template>
-  <a-row type="flex" justify="center" style="height: 100vh">
-    <a-col :span="14">
-      <a-card hoverable style="margin-top: 50px; margin-bottom: 50px">
-        <a-row
-          type="flex"
-          justify="center"
-          align="middle"
-          style="padding-top: 30px; padding-bottom: 50px"
+  <a-row type="flex" justify="center" align="middle">
+    <a-col :span="24">
+      <a-page-header title="Change Password" style="padding-top: 0" />
+      <a-form
+        :model="formState"
+        v-bind="layout"
+        name="nest-messages"
+        @finish="register"
+      >
+        <a-form-item
+          label="Current Password"
+          name="current_password"
+          :rules="[
+            {
+              required: true,
+              min: 6,
+            },
+          ]"
         >
-          <a-col :span="22">
-            <a-page-header title="Change Password" />
-            <a-form
-              :model="formState"
-              v-bind="layout"
-              name="nest-messages"
-              @finish="register"
+          <a-input-password
+            v-model:value="formState.current_password"
+            placeholder="Current Password"
+          />
+        </a-form-item>
+        <a-divider orientation="left">New Password</a-divider>
+        <a-form-item
+          label="Password"
+          name="password"
+          :rules="[{ required: true, min: 6 }]"
+        >
+          <a-input-password
+            :disabled="formState.current_password.length < 6"
+            v-model:value="formState.password"
+            @input="checkPassword"
+            placeholder="Password"
+            :valid="false"
+          />
+          <ul style="margin-bottom: 0" v-if="formState.password !== ''">
+            <li
+              v-bind:class="{
+                valid: passwordValid.contains_six_characters,
+              }"
             >
-              <a-form-item
-                label="Current Password"
-                name="current_password"
-                :rules="[
-                  {
-                    required: true,
-                    min: 6,
-                  },
-                ]"
-              >
-                <a-input-password
-                  v-model:value="formState.current_password"
-                  placeholder="Current Password"
-                />
-              </a-form-item>
-              <a-divider orientation="left">New Password</a-divider>
-              <a-form-item
-                label="Password"
-                name="password"
-                :rules="[{ required: true, min: 6 }]"
-              >
-                <a-input-password
-                  :disabled="formState.current_password.length < 6"
-                  v-model:value="formState.password"
-                  @input="checkPassword"
-                  placeholder="Password"
-                  :valid="false"
-                />
-                <ul
-                  class="pwCheckUl"
-                  style="margin-bottom: 0"
-                  v-if="formState.password !== ''"
-                >
-                  <li
-                    class="pwCheckLi"
-                    v-bind:class="{
-                      pw_check_is_valid: passwordValid.contains_six_characters,
-                    }"
-                  >
-                    6 Characters
-                  </li>
-                  <li
-                    class="pwCheckLi"
-                    v-bind:class="{
-                      pw_check_is_valid: passwordValid.contains_number,
-                    }"
-                  >
-                    Contains Number
-                  </li>
-                  <li
-                    class="pwCheckLi"
-                    v-bind:class="{
-                      pw_check_is_valid: passwordValid.contains_uppercase,
-                    }"
-                  >
-                    Contains Uppercase
-                  </li>
-                  <li
-                    class="pwCheckLi"
-                    v-bind:class="{
-                      pw_check_is_valid:
-                        passwordValid.contains_special_character,
-                    }"
-                  >
-                    Contains Special Character
-                  </li>
-                </ul>
-              </a-form-item>
-              <a-form-item
-                label="Re - Password"
-                name="password_confirmation"
-                :rules="[
-                  {
-                    required: true,
-                    min: 6,
-                    validator: matchingPasswords,
-                  },
-                ]"
-              >
-                <a-input-password
-                  :disabled="!formState.valid_password"
-                  v-model:value="formState.password_confirmation"
-                  placeholder="Re - Password"
-                />
-              </a-form-item>
-              <a-button type="primary" html-type="submit" block
-                >Update Password</a-button
-              >
-            </a-form>
-          </a-col>
-        </a-row>
-      </a-card>
+              6 Characters
+            </li>
+            <li
+              v-bind:class="{
+                valid: passwordValid.contains_number,
+              }"
+            >
+              Contains Number
+            </li>
+            <li
+              v-bind:class="{
+                valid: passwordValid.contains_uppercase,
+              }"
+            >
+              Contains Uppercase
+            </li>
+            <li
+              v-bind:class="{
+                valid: passwordValid.contains_special_character,
+              }"
+            >
+              Contains Special Character
+            </li>
+          </ul>
+        </a-form-item>
+        <a-form-item
+          label="Re - Password"
+          name="password_confirmation"
+          :rules="[
+            {
+              required: true,
+              min: 6,
+              validator: matchingPasswords,
+            },
+          ]"
+        >
+          <a-input-password
+            :disabled="!formState.valid_password"
+            v-model:value="formState.password_confirmation"
+            placeholder="Re - Password"
+          />
+        </a-form-item>
+        <a-button type="primary" html-type="submit" block
+          >Update Password</a-button
+        >
+      </a-form>
     </a-col>
   </a-row>
 </template>
@@ -152,6 +132,11 @@ export default defineComponent({
               message: res.message,
               icon: () => h(SmileOutlined, { style: "color: #42ba96" }),
             });
+
+            //close modal
+            store.dispatch("modalContentTag", null);
+            store.dispatch("modalClose");
+
             setTimeout(() => {
               router.go({ name: "login" });
             }, 500);
@@ -239,8 +224,8 @@ export default defineComponent({
 });
 </script>
 
-<style>
-.pwCheckUl {
+<style scoped>
+ul {
   padding-left: 20px;
   display: flex;
   flex-direction: column;
@@ -248,13 +233,13 @@ export default defineComponent({
   margin-bottom: 0;
 }
 
-.pwCheckLi {
+li {
   margin-bottom: 2px;
   color: #525f7f;
   position: relative;
 }
 
-.pwCheckLi:before {
+li:before {
   content: "";
   width: 0%;
   height: 2px;
@@ -266,10 +251,10 @@ export default defineComponent({
   transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.pw_check_is_valid {
+.valid {
   color: rgba(136, 152, 170, 0.8);
 }
-.pw_check_is_valid:before {
+.valid:before {
   width: 100%;
 }
 </style>

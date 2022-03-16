@@ -33,7 +33,7 @@
                   v-if="imageUrl"
                   :src="imageUrl"
                   alt="avatar"
-                  style="width: 100%"
+                  style="width: 50%"
                 />
                 <div v-else>
                   <loading-outlined v-if="loading"></loading-outlined>
@@ -70,38 +70,33 @@
                   :valid="false"
                 />
                 <ul
-                  class="pwCheckUl"
                   style="margin-bottom: 0"
                   v-if="formState.password !== ''"
                 >
                   <li
-                    class="pwCheckLi"
                     v-bind:class="{
-                      pw_check_is_valid: passwordValid.contains_six_characters,
+                      valid: passwordValid.contains_six_characters,
                     }"
                   >
                     6 Characters
                   </li>
                   <li
-                    class="pwCheckLi"
                     v-bind:class="{
-                      pw_check_is_valid: passwordValid.contains_number,
+                      valid: passwordValid.contains_number,
                     }"
                   >
                     Contains Number
                   </li>
                   <li
-                    class="pwCheckLi"
                     v-bind:class="{
-                      pw_check_is_valid: passwordValid.contains_uppercase,
+                      valid: passwordValid.contains_uppercase,
                     }"
                   >
                     Contains Uppercase
                   </li>
                   <li
-                    class="pwCheckLi"
                     v-bind:class="{
-                      pw_check_is_valid:
+                      valid:
                         passwordValid.contains_special_character,
                     }"
                   >
@@ -177,12 +172,6 @@ interface FormState {
   last_name: string;
   image: any;
   valid_password: boolean;
-}
-
-function getBase64(img: Blob, callback: (base64Url: string) => void) {
-  const reader = new FileReader();
-  reader.addEventListener('load', () => callback(reader.result as string));
-  reader.readAsDataURL(img);
 }
 
 export default defineComponent({
@@ -278,6 +267,12 @@ export default defineComponent({
       });
     };
 
+    const getBase64 = (img: Blob, callback: (base64Url: string) => void) => {
+      const reader = new FileReader();
+      reader.addEventListener("load", () => callback(reader.result as string));
+      reader.readAsDataURL(img);
+    };
+
     const beforeUpload = (file: any["fileList"][number]) => {
       const isJpgOrPng =
         file.type === "image/jpeg" || file.type === "image/png";
@@ -345,8 +340,8 @@ export default defineComponent({
 });
 </script>
 
-<style>
-.pwCheckUl {
+<style scoped>
+ul {
   padding-left: 20px;
   display: flex;
   flex-direction: column;
@@ -354,13 +349,13 @@ export default defineComponent({
   margin-bottom: 0;
 }
 
-.pwCheckLi {
+li {
   margin-bottom: 2px;
   color: #525f7f;
   position: relative;
 }
 
-.pwCheckLi:before {
+li:before {
   content: "";
   width: 0%;
   height: 2px;
@@ -372,10 +367,10 @@ export default defineComponent({
   transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.pw_check_is_valid {
+.valid {
   color: rgba(136, 152, 170, 0.8);
 }
-.pw_check_is_valid:before {
+.valid:before {
   width: 100%;
 }
 </style>

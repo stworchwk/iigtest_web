@@ -1,24 +1,20 @@
 <template>
   <a-layout-header style="background: #fff; padding: 0">
     <strong style="margin-left: 20px">IIG Test</strong>
-    <a-menu mode="horizontal" style="float: right;">
+    <a-menu mode="horizontal" style="float: right">
       <a-sub-menu key="sub1">
         <template #icon>
           <a-avatar :src="profile.thumbnail" />
         </template>
         <template #title>{{ profile.full_name }}</template>
         <a-menu-item-group>
-          <router-link :to="{ name: 'editProfile' }">
-            <a-menu-item key="setting:1"
-              ><user-outlined /> Edit Profile</a-menu-item
-            >
-          </router-link>
-          <router-link :to="{ name: 'changePassword' }">
-            <a-menu-item key="setting:2"
-              ><lock-outlined /> Change Password</a-menu-item
-            >
-          </router-link>
-          <a-menu-item key="setting:3" @click="logout()" style="color: #1890ff"
+          <a-menu-item key="setting:1" @click="openMyProfile"
+            ><user-outlined /> My Profile</a-menu-item
+          >
+          <a-menu-item key="setting:2" @click="openChangePassword"
+            ><lock-outlined /> Change Password</a-menu-item
+          >
+          <a-menu-item key="setting:3" @click="logout()"
             ><logout-outlined /> Logout</a-menu-item
           >
         </a-menu-item-group>
@@ -28,7 +24,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, inject, h, createVNode } from "vue";
+import { defineComponent, inject, h, createVNode, ref } from "vue";
 import {
   UserOutlined,
   LogoutOutlined,
@@ -49,6 +45,7 @@ export default defineComponent({
   },
   setup() {
     const router: any = inject("router"); // inject router
+
     const store = useStore();
 
     const profile = {
@@ -105,10 +102,24 @@ export default defineComponent({
       });
     };
 
+    const openMyProfile = () => {
+      store.dispatch("modalShow");
+      store.dispatch("modalContentTag", "myProfile");
+    };
+
+    const openChangePassword = () => {
+      store.dispatch("modalShow");
+      store.dispatch("modalContentTag", "changePassword");
+    }
+
     return {
       logout,
-      profile
+      profile,
+      router,
+      openMyProfile,
+      openChangePassword
     };
-  }
+  },
+  methods: {},
 });
 </script>
